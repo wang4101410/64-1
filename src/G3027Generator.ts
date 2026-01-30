@@ -1,5 +1,5 @@
 
-import { AppState } from './types';
+import { AppState } from '../types';
 import { 
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, 
   WidthType, BorderStyle, Header, Footer, 
