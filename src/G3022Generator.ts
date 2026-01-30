@@ -1,5 +1,5 @@
 
-import { AppState, ComplianceStatus, FinalConclusion } from './types';
+import { AppState, ComplianceStatus, FinalConclusion } from '../types';
 import { 
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, 
   WidthType, BorderStyle, Header, Footer, 
