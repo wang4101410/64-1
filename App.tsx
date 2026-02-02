@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   BookOpen, Layers, LayoutDashboard, FileText, 
   AlertCircle, ClipboardList, CheckCircle2 
@@ -10,9 +10,11 @@ import { G3022_DEFAULT_CHECKLIST, G3026_DEFAULT_CHECKLIST } from './constants';
 import G3022Report from './G3022Report';
 import G3026Report from './G3026Report';
 import G3027Report from './G3027Report';
+import { apiService } from './src/api.ts';
 
 const App: React.FC = () => {
   const [activeReport, setActiveReport] = useState<'G-3022' | 'G-3026' | 'G-3027'>('G-3022');
+  const [userId] = useState(() => localStorage.getItem('userId') || 'default-user');
   
   const [state, setState] = useState<AppState>({
     reportType: 'G-3022',
@@ -99,6 +101,44 @@ const App: React.FC = () => {
       },
     },
   });
+
+  // 自動存檔功能
+  const saveData = useCallback(async (data: AppState) => {
+    try {
+      const response = await apiService.saveUserData(userId, data);
+      if (response.success) {
+        console.log('數據已自動保存');
+      } else {
+        console.error('自動保存失敗:', response.error);
+      }
+    } catch (error) {
+      console.error('自動保存錯誤:', error);
+    }
+  }, [userId]);
+
+  // 監聽state變化並自動保存
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      saveData(state);
+    }, 2000); // 2秒後保存
+
+    return () => clearTimeout(timeoutId);
+  }, [state, saveData]);
+
+  // 載入數據
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await apiService.loadUserData(userId);
+        if (response.success && response.data) {
+          setState(response.data);
+        }
+      } catch (error) {
+        console.error('載入數據錯誤:', error);
+      }
+    };
+    loadData();
+  }, [userId]);
 
   // --- Data Synchronization Core ---
   const syncData = (source: 'G-3022' | 'G-3026' | 'G-3027', newState: AppState) => {
